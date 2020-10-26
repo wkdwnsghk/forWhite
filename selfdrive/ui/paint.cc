@@ -654,7 +654,7 @@ static void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w )
     char uom_str[3];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
 
-    snprintf(val_str, sizeof(val_str), "%.2f", s->scene.gpsAltitude);
+    snprintf(val_str, sizeof(val_str), "%.1f", s->scene.gpsAltitude);
     snprintf(uom_str, sizeof(uom_str), "m");
     bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "ALTITUDE",
         bb_rx, bb_ry, bb_uom_dx,
