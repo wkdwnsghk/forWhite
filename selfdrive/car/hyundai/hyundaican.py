@@ -45,11 +45,7 @@ def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
     values["CF_Lkas_LdwsActivemode"] = 2
     values["CF_Lkas_SysWarning"] = lkas11["CF_Lkas_SysWarning"]
 
-  elif car_fingerprint in [CAR.OPTIMA, CAR.OPTIMA_HEV, CAR.K7, CAR.K7_HEV]:
-    values["CF_Lkas_LdwsActivemode"] = 0
-
   elif car_fingerprint == CAR.SONATA_LF_TURBO:
-    values["CF_Lkas_Bca_R"] = 0
     values["CF_Lkas_FcwOpt_USM"] = 2 if enabled else 1
     values["CF_Lkas_LdwsOpt_USM"] = 2
     values["CF_Lkas_FcwOpt_USM"] = 2 if enabled else 1
@@ -175,7 +171,7 @@ def create_spas11(packer, car_fingerprint, frame, en_spas, apply_steer, bus):
   return packer.make_can_msg("SPAS11", bus, values)
 
 def create_spas12(bus):
-  return [1268, 0, "\x00\x00\x00\x00\x00\x00\x00\x00", bus]
+  return [1268, 0, b"\x00\x00\x00\x00\x00\x00\x00\x00", bus]
 
 def create_ems11(packer, ems11, enabled):
   values = copy.copy(ems11)
