@@ -1,7 +1,7 @@
 import os
 import math
 from common.realtime import sec_since_boot, DT_MDL
-from selfdrive.ntune import ntune_get
+from selfdrive.ntune import ntune_get, ntune_isEnabled
 from selfdrive.swaglog import cloudlog
 from selfdrive.controls.lib.lateral_mpc import libmpc_py
 from selfdrive.controls.lib.drive_helpers import MPC_COST_LAT
@@ -103,8 +103,12 @@ class PathPlanner():
 
     # Update vehicle model
     x = max(sm['liveParameters'].stiffnessFactor, 0.1)
-    # sr = max(sm['liveParameters'].steerRatio, 0.1)
-    sr = max(ntune_get('steerRatio'), 0.1)
+
+    if ntune_isEnabled('useLiveSteerRatio'):
+      sr = max(sm['liveParameters'].steerRatio, 0.1)
+    else:
+      sr = max(ntune_get('steerRatio'), 0.1)
+
     VM.update_params(x, sr)
 
     curvature_factor = VM.curvature_factor(v_ego)
