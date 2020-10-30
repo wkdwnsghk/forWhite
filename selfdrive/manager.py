@@ -564,7 +564,7 @@ def main():
     ("OpenpilotEnabledToggle", "1"),
     ("LaneChangeEnabled", "1"),
     ("LongControlEnabled", "0"),
-    ("MadModeEnabled", "1"),
+    ("MadModeEnabled", "0"),
     ("AutoLaneChangeEnabled", "0"),
     ("IsDriverViewEnabled", "0"),
   ]
