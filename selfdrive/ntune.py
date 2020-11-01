@@ -126,7 +126,7 @@ class nTune():
   def checkValidCommon(self):
     updated = False
 
-    if self.checkValue("useLiveSteerRatio", 0., 1., 0.):
+    if self.checkValue("useLiveSteerRatio", 0., 1., 1.):
       updated = True
 
     if self.checkValue("steerRatio", 5.0, 25.0, 14.4):
@@ -227,7 +227,7 @@ class nTune():
           self.config["steerMax"] = round(self.CP.steerMaxV[0], 2)
 
         else:
-          self.config["useLiveSteerRatio"] = 0.
+          self.config["useLiveSteerRatio"] = 1.
           self.config["steerRatio"] = round(self.CP.steerRatio, 2)
           self.config["steerActuatorDelay"] = round(self.CP.steerActuatorDelay, 2)
           self.config["steerRateCost"] = round(self.CP.steerRateCost, 2)
