@@ -72,7 +72,6 @@ keys = {
   b"Offroad_IsTakingSnapshot": [TxType.CLEAR_ON_MANAGER_START],
   b"Offroad_NeosUpdate": [TxType.CLEAR_ON_MANAGER_START],
   b"Offroad_UpdateFailed": [TxType.CLEAR_ON_MANAGER_START],
-  b"Offroad_HardwareUnsupported": [TxType.CLEAR_ON_MANAGER_START],
 }
 
 def ensure_bytes(v):
