@@ -11,7 +11,7 @@ from selfdrive.car import gen_empty_fingerprint
 
 from cereal import car, log
 EventName = car.CarEvent.EventName
-HwType = log.HealthData.Hwtype
+HwType = log.HealthData.HwType
 
 
 def get_startup_event(car_recognized, controller_available, hw_type):
