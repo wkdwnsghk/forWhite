@@ -274,7 +274,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Upgrade to comma two or black panda",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
-    ET.NO_ENTRY: NoEntryAlert("Unsupported Hardware"),
+    #ET.NO_ENTRY: NoEntryAlert("Unsupported Hardware"),
   },
 
   EventName.invalidLkasSetting: {
