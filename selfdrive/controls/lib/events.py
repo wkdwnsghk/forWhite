@@ -264,7 +264,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   EventName.startupGreyPanda: {
     ET.PERMANENT: Alert(
       "경고: 그레이 판다가 감지되었습니다",
-      "하지만 사용할 수 있습니다^^",
+      "하지만 사용할 수 있습니다",
       AlertStatus.userPrompt, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
   },
@@ -272,7 +272,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   EventName.whitePandaUnsupported: {
     ET.PERMANENT: Alert(
       "경고: 화이트 판다가 감지되었습니다",
-      "하지만 사용할 수 있습니다^^",
+      "하지만 사용할 수 있습니다",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
     #ET.NO_ENTRY: NoEntryAlert("Unsupported Hardware"),
