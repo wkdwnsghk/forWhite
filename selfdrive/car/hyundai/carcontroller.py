@@ -91,18 +91,15 @@ class CarController():
       self.mdps11_stat_last = 0
       self.spas_always = False
 
-    self.scc_smoother = SccSmoother(accel_gain=1.0, decel_gain=1.0, curvature_gain=0.87)
+    self.scc_smoother = SccSmoother(accel_gain=1.0, decel_gain=1.0, curvature_gain=0.85)
 
   def update(self, enabled, CS, frame, CC, actuators, pcm_cancel_cmd, visual_alert,
-             left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, sm):
+             left_lane, right_lane, left_lane_depart, right_lane_depart, set_speed, lead_visible, controls):
 
     # *** compute control surfaces ***
 
     # gas and brake
     apply_accel = actuators.gas - actuators.brake
-
-    aa = apply_accel
-
     apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady)
     apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
 
@@ -136,7 +133,7 @@ class CarController():
     # Disable steering while turning blinker on and speed below 60 kph
     if CS.out.leftBlinker or CS.out.rightBlinker:
       self.turning_signal_timer = 0.5 / DT_CTRL  # Disable for 0.5 Seconds after blinker turned off
-    if self.turning_indicator_alert: # set and clear by interface
+    if self.turning_indicator_alert: # and CS.out.vEgo < 2 * CV.KPH_TO_MS: # 상시조향 시 사용하는 줄
       lkas_active = 0
     if self.turning_signal_timer > 0:
       self.turning_signal_timer -= 1
@@ -227,7 +224,7 @@ class CarController():
 
     # scc smoother
     if not self.longcontrol:
-      self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, apply_accel, sm)
+      self.scc_smoother.update(enabled, can_sends, self.packer, CC, CS, frame, apply_accel, controls)
 
     if CS.mdps_bus:  # send mdps12 to LKAS to prevent LKAS error
       can_sends.append(create_mdps12(self.packer, frame, CS.mdps12))

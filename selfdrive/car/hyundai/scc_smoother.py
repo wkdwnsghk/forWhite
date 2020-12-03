@@ -7,12 +7,12 @@ from selfdrive.car.hyundai.interface import ButtonType
 from selfdrive.config import Conversions as CV, RADAR_TO_CAMERA
 from selfdrive.car.hyundai.values import Buttons
 from common.params import Params
+from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX, V_CRUISE_MIN, V_CRUISE_DELTA_KM, V_CRUISE_DELTA_MI
 from selfdrive.road_speed_limiter import road_speed_limiter_get_max_speed
 
 # do not modify
-V_CRUISE_DELTA_MI = 5 * CV.MPH_TO_KPH
-V_CRUISE_DELTA_KM = 10
-MIN_SET_SPEED = 30
+MIN_SET_SPEED = V_CRUISE_MIN
+MAX_SET_SPEED = V_CRUISE_MAX
 
 ALIVE_COUNT_MIN = 6
 ALIVE_COUNT_MAX = 8
@@ -65,6 +65,8 @@ class SccSmoother:
     self.state = int(Params().get('SccSmootherState'))
     self.scc_smoother_enabled = Params().get('SccSmootherEnabled') == b'1'
     self.slow_on_curves = Params().get('SccSmootherSlowOnCurves') == b'1'
+
+    self.sync_set_speed_while_gas_pressed = True
 
   def reset(self):
     self.accel_buf = []
@@ -124,14 +126,12 @@ class SccSmoother:
 
       self.max_set_speed = sum(self.max_set_speed_buf) / len(self.max_set_speed_buf)
 
-  def update(self, enabled, can_sends, packer, CC, CS, frame, apply_accel, sm):
+  def update(self, enabled, can_sends, packer, CC, CS, frame, apply_accel, controls):
 
     if not self.scc_smoother_enabled:
       return
 
     clu11_speed = CS.clu11["CF_Clu_Vanz"]
-
-    self.cal_max_speed(frame, CC, CS, sm, clu11_speed)
 
     if self.dispatch_cancel_buttons(CC, CS):
       return
@@ -152,13 +152,17 @@ class SccSmoother:
 
     current_set_speed = CS.cruiseState_speed * CV.MS_TO_KPH
 
-    accel, override_acc = self.cal_acc(apply_accel, CS, clu11_speed, sm)
+    accel, override_acc = self.cal_acc(apply_accel, CS, clu11_speed, controls.sm)
 
     if CS.gas_pressed:
       self.target_speed = clu11_speed
+      if clu11_speed > controls.cruiseOpMaxSpeed and self.sync_set_speed_while_gas_pressed:
+        set_speed = clip(clu11_speed, MIN_SET_SPEED, MAX_SET_SPEED)
+        CC.cruiseOpMaxSpeed = controls.cruiseOpMaxSpeed = controls.v_cruise_kph = set_speed
     else:
       self.target_speed = clu11_speed + accel
 
+    self.cal_max_speed(frame, CC, CS, controls.sm, clu11_speed)
     self.target_speed = clip(self.target_speed, MIN_SET_SPEED, self.max_set_speed)
 
     CC.sccSmoother.logMessage = '{:.2f}/{:.2f}, {:.2f}, {:.1f}/{:d}, btn:{:d}' \
@@ -243,18 +247,22 @@ class SccSmoother:
 
       d = lead.dRel - 5.
 
-      if 0. < d < -lead.vRel * (9. + cruise_gap) * 2. and lead.vRel < -1.:
-        t = d / lead.vRel
+      if 0. < d < -lead.vRel * (7.7 + cruise_gap) * 2. and lead.vRel < -1.:
+        t = d / lead.vRel * 0.98
         acc = -(lead.vRel / t) * CV.MS_TO_KPH * 1.8
         override_acc = acc
         accel = (op_accel + acc) / 2.
-      else:
-        accel = op_accel * interp(clu11_speed, [50., 100.], [1.4, 1.2])
-
+      else:        
+        accel = op_accel * interp(clu11_speed, [0., 25., 50., 51., 60., 100.], [2.4, 2.9, 1.7, 1.65, 1.4, 1.0])
+#        if 35 > lead.dRel > 15:
+#          if clu11_speed < 50:
+#            accel = op_accel * 2.5               
+#        else:
+#          accel = op_accel * interp(clu11_speed, [50., 60., 100.], [1.75, 1.4, 1.0])
     if accel > 0.:
-      accel *= self.accel_gain * interp(clu11_speed, [30., 100.], [1.5, 1.0])
+      accel *= self.accel_gain * interp(clu11_speed, [35., 60., 100.], [1.5, 1.25, 1.2])
     else:
-      accel *= self.decel_gain * 1.8
+      accel *= self.decel_gain * interp(clu11_speed, [70., 75.], [1.7928, 1.8])
 
     return clip(accel, -LIMIT_DECEL, LIMIT_ACCEL), override_acc
 
@@ -336,7 +344,7 @@ class SccSmoother:
         elif ButtonPrev == ButtonType.decelCruise:
           v_cruise_kph -= V_CRUISE_DELTA - -v_cruise_kph % V_CRUISE_DELTA
         ButtonCnt %= 70
-      v_cruise_kph = clip(v_cruise_kph, MIN_SET_SPEED, 144)
+      v_cruise_kph = clip(v_cruise_kph, MIN_SET_SPEED, MAX_SET_SPEED)
 
     return v_cruise_kph
 

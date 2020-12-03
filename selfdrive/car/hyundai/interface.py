@@ -132,33 +132,39 @@ class CarInterface(CarInterfaceBase):
 
     ret.lateralTuning.init('lqr')
 
-    ret.lateralTuning.lqr.scale = 1900.
+    ret.lateralTuning.lqr.scale = 1680.0
     ret.lateralTuning.lqr.ki = 0.01
-    ret.lateralTuning.lqr.dcGain = 0.0029
+    ret.lateralTuning.lqr.dcGain = 0.002858
 
     ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
     ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
     ret.lateralTuning.lqr.c = [1., 0.]
-    ret.lateralTuning.lqr.k = [-110., 451.]
-    ret.lateralTuning.lqr.l = [0.33, 0.318]
+    ret.lateralTuning.lqr.k = [-110.73572306, 451.22718255]
+    ret.lateralTuning.lqr.l = [0.3233671, 0.3185757]
 
-    ret.steerRatio = 14.4
-    ret.steerActuatorDelay = 0.25
-    ret.steerLimitTimer = 2.5
+    ret.steerRatio = 13.8
+    ret.steerActuatorDelay = 0.20
+    ret.steerLimitTimer = 2.0
 
-    ret.steerRateCost = 0.55
+    ret.steerRateCost = 0.555
 
     ret.steerMaxBP = [0.]
-    ret.steerMaxV = [1.3]
+    ret.steerMaxV = [1.5]
 
     ###################################################
     # scc smoother
-    ret.longitudinalTuning.kpBP = [0., 10., 40.]
-    ret.longitudinalTuning.kpV = [1.2, 0.8, 0.3]
+    ret.longitudinalTuning.kpBP = [0., 40. * CV.KPH_TO_MS, 130. * CV.KPH_TO_MS]
+    ret.longitudinalTuning.kpV = [1.4, 1.0, 0.4]
     ret.longitudinalTuning.kiBP = [0.]
     ret.longitudinalTuning.kiV = [0.]
     ret.longitudinalTuning.deadzoneBP = [0., 40]
     ret.longitudinalTuning.deadzoneV = [0., 0.02]
+#    ret.longitudinalTuning.kpBP = [0., 10., 40.]
+#    ret.longitudinalTuning.kpV = [1.2, 0.8, 0.3]
+#    ret.longitudinalTuning.kiBP = [0.]
+#    ret.longitudinalTuning.kiV = [0.]
+#    ret.longitudinalTuning.deadzoneBP = [0., 40]
+#    ret.longitudinalTuning.deadzoneV = [0., 0.02]
 
     #ret.longitudinalTuning.kpBP = [0., 5., 35.]
     #ret.longitudinalTuning.kpV = [1.2, 0.8, 0.5]
@@ -225,7 +231,6 @@ class CarInterface(CarInterfaceBase):
 
     # most HKG cars has no long control, it is safer and easier to engage by main on
 
-    # scc smoother
     if self.mad_mode_enabled and not self.CC.longcontrol:
       ret.cruiseState.enabled = ret.cruiseState.available
 
@@ -297,6 +302,7 @@ class CarInterface(CarInterfaceBase):
         if b.type == ButtonType.decelCruise and not b.pressed:
           events.add(EventName.buttonEnable)
 
+    # scc smoother
     if self.CC.scc_smoother is not None:
       self.CC.scc_smoother.inject_events(events)
 
@@ -305,10 +311,11 @@ class CarInterface(CarInterfaceBase):
     self.CS.out = ret.as_reader()
     return self.CS.out
 
-  def apply(self, c, sm):
+  # scc smoother - hyundai only
+  def apply(self, c, controls):
     can_sends = self.CC.update(c.enabled, self.CS, self.frame, c, c.actuators,
                                c.cruiseControl.cancel, c.hudControl.visualAlert, c.hudControl.leftLaneVisible,
                                c.hudControl.rightLaneVisible, c.hudControl.leftLaneDepart, c.hudControl.rightLaneDepart,
-                               c.hudControl.setSpeed, c.hudControl.leadVisible, sm)
+                               c.hudControl.setSpeed, c.hudControl.leadVisible, controls)
     self.frame += 1
     return can_sends
