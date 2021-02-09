@@ -117,7 +117,7 @@ class CarState(CarStateBase):
       elif cp.vl["CLU15"]["CF_Clu_InhibitP"] == 1:
         ret.gearShifter = GearShifter.park
       elif cp.vl["CLU15"]["CF_Clu_InhibitR"] == 1:
-        ret.gearShifter = GearShifter.reverse
+        ret.gearShifter = GearShifter.drive
       else:
         ret.gearShifter = GearShifter.unknown
     # Gear Selecton via TCU12
