@@ -338,7 +338,7 @@ FEATURES = {
   "use_bsm": {CAR.SONATA, CAR.PALISADE, CAR.GENESIS, CAR.NIRO_HEV, CAR.GENESIS_G70, CAR.GENESIS_G80, CAR.GENESIS_G90,
               CAR.GENESIS_G90_L, CAR.KONA, CAR.SPORTAGE, CAR.SELTOS},
 
-  "use_blinker_flash": {CAR.SONATA_LF_TURBO},
+  "use_blinker_flash": {CAR.SONATA_LF_TURBO, CAR.SELTOS},
 
   "use_ldws": False,
 }
